@@ -1,0 +1,117 @@
+@startuml class
+title COLORS Web Application - Class Diagram
+
+skinparam classAttributeIconSize 0
+hide empty members
+hide circle
+skinparam shadowing false
+skinparam roundCorner 14
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam titleFontSize 20
+skinparam titleFontColor #263238
+skinparam ArrowColor #546E7A
+skinparam ArrowFontColor #37474F
+skinparam class {
+  BorderColor #546E7A
+  HeaderBackgroundColor #FFFFFF
+}
+skinparam package {
+  BorderColor #90A4AE
+  FontColor #263238
+}
+skinparam stereotypeCBackgroundColor #FFFFFF
+
+package "Front End (public/)" #F5FAFF {
+  class "index.html" as IndexPage <<page>> #E3F2FD;line:1E88E5 {
+    loginName : text input
+    loginPassword : password input
+    loginButton : button
+    loginResult : span
+  }
+
+  class "color.html" as ColorPage <<page>> #E3F2FD;line:1E88E5 {
+    userName : span
+    logoutButton : button
+    searchText : text input
+    searchColorButton : button
+    colorSearchResult : span
+    colorList : paragraph
+    colorText : text input
+    addColorButton : button
+    colorAddResult : span
+  }
+
+  class "code.js" as CodeJS <<script>> #BBDEFB;line:1565C0 {
+    urlBase : String = "http://COP4331-5.com/LAMPAPI"
+    extension : String = "php"
+    userId : int
+    firstName : String
+    lastName : String
+    --
+    doLogin() : void
+    saveCookie() : void
+    readCookie() : void
+    doLogout() : void
+    addColor() : void
+    searchColor() : void
+  }
+
+  class "md5.js" as MD5JS <<script>> #BBDEFB;line:1565C0 {
+    md5(string, key, raw) : String
+  }
+}
+
+package "API (api/)" #F6FBF6 {
+  class "Login.php" as LoginAPI <<endpoint>> #E8F5E9;line:43A047 {
+    getRequestInfo() : array
+    sendResultInfoAsJson(obj) : void
+    returnWithError(err) : void
+    returnWithInfo(firstName, lastName, id) : void
+  }
+
+  class "SearchColors.php" as SearchAPI <<endpoint>> #E8F5E9;line:43A047 {
+    getRequestInfo() : array
+    sendResultInfoAsJson(obj) : void
+    returnWithError(err) : void
+    returnWithInfo(searchResults) : void
+  }
+
+  class "AddColor.php" as AddAPI <<endpoint>> #E8F5E9;line:43A047 {
+    getRequestInfo() : array
+    sendResultInfoAsJson(obj) : void
+    returnWithError(err) : void
+  }
+}
+
+package "Database (COP4331)" #FFFAF2 {
+  class Users <<table>> #FFF3E0;line:EF6C00 {
+    {field} ID : INT <<PK>>
+    {field} FirstName : VARCHAR(50)
+    {field} LastName : VARCHAR(50)
+    {field} Login : VARCHAR(50)
+    {field} Password : VARCHAR(50)
+  }
+
+  class Colors <<table>> #FFF3E0;line:EF6C00 {
+    {field} ID : INT <<PK>>
+    {field} Name : VARCHAR(50)
+    {field} UserID : INT
+  }
+}
+
+IndexPage ..> CodeJS : loads
+IndexPage ..> MD5JS : loads
+ColorPage ..> CodeJS : loads, calls readCookie()
+
+CodeJS ..> LoginAPI : POST {login, password}
+CodeJS ..> SearchAPI : POST {search, userId}
+CodeJS ..> AddAPI : POST {color, userId}
+
+LoginAPI ..> Users : SELECT
+SearchAPI ..> Colors : SELECT
+AddAPI ..> Colors : INSERT
+
+Users "1" -- "0..*" Colors : UserID matches ID >
+
+@enduml
