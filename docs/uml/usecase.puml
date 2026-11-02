@@ -1,0 +1,62 @@
+@startuml usecase
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam shadowing false
+skinparam roundCorner 14
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam titleFontSize 20
+skinparam titleFontColor #263238
+skinparam ArrowColor #546E7A
+skinparam ArrowFontColor #37474F
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1E88E5
+  FontColor #0D47A1
+}
+skinparam actor {
+  BackgroundColor #EDE7F6
+  BorderColor #5E35B1
+  FontColor #311B92
+}
+skinparam rectangle {
+  BackgroundColor #FAFAFA
+  BorderColor #90A4AE
+  FontColor #37474F
+}
+
+title COLORS Web Application - Use Case Diagram
+
+actor "User" as User
+actor "MySQL Database" as DB <<system>> #FFE0B2;line:EF6C00
+
+rectangle "COLORS Web Application" {
+  usecase "Log In" as UC_Login
+  usecase "Validate Credentials" as UC_Validate #E8F5E9;line:43A047
+  usecase "Show Login Error" as UC_LoginError #FFEBEE;line:E53935
+  usecase "Access Colors Page" as UC_Access
+  usecase "Verify Session Cookie" as UC_Session #E8F5E9;line:43A047
+  usecase "Search Colors" as UC_Search
+  usecase "Add Color" as UC_Add
+  usecase "Log Out" as UC_Logout
+}
+
+User -- UC_Login
+User -- UC_Access
+User -- UC_Search
+User -- UC_Add
+User -- UC_Logout
+
+UC_Login ..> UC_Validate : <<include>>
+UC_LoginError ..> UC_Login : <<extend>>
+UC_Access ..> UC_Session : <<include>>
+UC_Search ..> UC_Access : <<include>>
+UC_Add ..> UC_Access : <<include>>
+UC_Logout ..> UC_Access : <<include>>
+
+UC_Validate -- DB
+UC_Search -- DB
+UC_Add -- DB
+
+@enduml
