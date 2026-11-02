@@ -1,0 +1,113 @@
+@startuml activity
+title COLORS Web Application - Activity Diagram
+
+skinparam shadowing false
+skinparam roundCorner 14
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam titleFontSize 20
+skinparam titleFontColor #263238
+skinparam ArrowColor #546E7A
+skinparam ArrowFontColor #37474F
+skinparam swimlane {
+  BorderColor #90A4AE
+  TitleFontSize 15
+  TitleFontColor #263238
+}
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #78909C
+  DiamondBackgroundColor #FFF8E1
+  DiamondBorderColor #FFA000
+  StartColor #43A047
+  EndColor #E53935
+}
+
+|#EDE7F6|User|
+start
+:Open login page (index.html);
+repeat
+  :Enter username and password;
+  :Click "Do It";
+  |#E3F2FD|Browser (code.js)|
+  :doLogin(): send POST to Login.php
+  with {login, password};
+  |#E8F5E9|PHP API|
+  :Login.php: decode JSON request;
+  |#FFF3E0|MySQL Database|
+  :SELECT ID, firstName, lastName FROM Users
+  WHERE Login = ? AND Password = ?;
+  |PHP API|
+  if (Matching row found?) then (yes)
+    :Return {id, firstName, lastName, error: ""};
+  else (no)
+    :Return {id: 0, empty firstName and lastName,
+    error: "No Records Found"};
+  endif
+  |Browser (code.js)|
+  backward :Show "User/Password combination incorrect";
+repeat while (id < 1?) is (yes) not (no)
+:saveCookie(): store firstName, lastName,
+userId (expires in 20 minutes);
+:Redirect to color.html;
+:readCookie() on page load;
+if (Valid userId in cookie?) then (no)
+  :Redirect to index.html;
+  stop
+else (yes)
+endif
+
+|User|
+repeat
+  :Choose an action;
+  if (Action?) then (Search Color)
+    :Enter search text and click "Search Color";
+    |Browser (code.js)|
+    :searchColor(): send POST to SearchColors.php
+    with {search, userId};
+    |PHP API|
+    :SearchColors.php: decode JSON request;
+    |MySQL Database|
+    :SELECT Name FROM Colors
+    WHERE Name LIKE %search% AND UserID = ?;
+    |PHP API|
+    if (Any colors found?) then (yes)
+      :Return {results: [...], error: ""};
+    else (no)
+      :Return {id: 0, empty firstName and lastName,
+      error: "No Records Found"};
+    endif
+    |Browser (code.js)|
+    :Show "Color(s) has been retrieved";
+    if (Response contains results?) then (yes)
+      :Display matching colors in the color list;
+    else (no)
+      :Color list is not updated;
+    endif
+  elseif (Action?) then (Add Color)
+    |User|
+    :Enter color name and click "Add Color";
+    |Browser (code.js)|
+    :addColor(): send POST to AddColor.php
+    with {color, userId};
+    |PHP API|
+    :AddColor.php: decode JSON request;
+    |MySQL Database|
+    :INSERT INTO Colors (UserId, Name) VALUES (?, ?);
+    |PHP API|
+    :Return {error: ""};
+    |Browser (code.js)|
+    :Show "Color has been added";
+  else (Log Out)
+    |User|
+    :Click "Log Out";
+    |Browser (code.js)|
+    :doLogout(): clear user data and expire cookie;
+    :Redirect to index.html;
+    stop
+  endif
+  |User|
+repeat while (Continue using the app?) is (yes)
+stop
+
+@enduml
