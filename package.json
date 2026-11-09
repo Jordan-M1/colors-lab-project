@@ -1,0 +1,21 @@
+{
+  "name": "colors-lab-project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Linting setup for the COLORS LAMP web application",
+  "scripts": {
+    "lint:html": "htmlhint \"public/**/*.html\"",
+    "lint:css": "stylelint \"public/**/*.css\"",
+    "lint:js": "eslint public/js",
+    "lint": "npm run lint:html && npm run lint:css && npm run lint:js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "htmlhint": "^1.1.4",
+    "stylelint": "^16.1.0",
+    "stylelint-config-standard": "^36.0.0"
+  }
+}

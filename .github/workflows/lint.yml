@@ -1,0 +1,32 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install linting tools
+        run: npm install --no-audit --no-fund
+
+      - name: Lint HTML
+        run: npm run lint:html
+
+      - name: Lint CSS
+        if: ${{ !cancelled() }}
+        run: npm run lint:css
+
+      - name: Lint JavaScript
+        if: ${{ !cancelled() }}
+        run: npm run lint:js
